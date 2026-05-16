@@ -1,125 +1,97 @@
 /**
- * TanpuraEngine — Continuous Sa-Pa drone using Web Audio API.
+ * TanpuraEngine — Sample-based tanpura drone.
  *
- * Creates a rich, buzzing tanpura-like drone with:
- * - Sa (base) and Pa strings
- * - Rich harmonics simulating jawari (bridge buzz)
- * - Slow amplitude cycling to mimic string plucking pattern
+ * Uses pre-recorded tanpura loops (Freesound pack 9600 by sankalp,
+ * CC BY 4.0). Picks the closest available sample and adjusts
+ * playbackRate for pitch-shifting (max ±1 semitone).
+ *
+ * OGG format is used for gapless looping (mp3 adds codec padding).
  */
 
 import * as Tone from 'tone';
 
+const SAMPLES = [
+  { note: 'C', baseSaHz: 130.81, url: '/audio/tanpura/C.ogg' },
+  { note: 'D', baseSaHz: 146.83, url: '/audio/tanpura/D.ogg' },
+];
+
+function pickSample(targetHz) {
+  let best = SAMPLES[0];
+  let bestDist = Infinity;
+  for (const s of SAMPLES) {
+    const dist = Math.abs(12 * Math.log2(targetHz / s.baseSaHz));
+    if (dist < bestDist) {
+      bestDist = dist;
+      best = s;
+    }
+  }
+  return {
+    url: best.url,
+    playbackRate: targetHz / best.baseSaHz,
+  };
+}
+
 export default class TanpuraEngine {
   constructor() {
     this.isPlaying = false;
-    this.nodes = [];
+    this._volume = -12;
     this._baseSaHz = null;
-    this._volume = -12; // dB
-    this._masterGain = null;
+    this._player = null;
+    this._gainNode = null;
   }
 
-  /**
-   * Start the tanpura drone.
-   * @param {number} baseSaHz — frequency of Sa
-   */
-  start(baseSaHz) {
+  async start(baseSaHz) {
     if (this.isPlaying) this.stop();
     this._baseSaHz = baseSaHz;
 
-    const paHz = baseSaHz * 1.5; // Pa = 3/2 ratio
-    const saLowHz = baseSaHz * 0.5; // Lower octave Sa
+    const { url, playbackRate } = pickSample(baseSaHz);
 
-    this._masterGain = new Tone.Gain(Tone.dbToGain(this._volume)).toDestination();
+    this._gainNode = new Tone.Gain(Tone.dbToGain(this._volume));
+    this._gainNode.toDestination();
 
-    // String definitions: [frequency, relative volume, pan]
-    const strings = [
-      { freq: paHz, vol: 0.25, pan: -0.3 },
-      { freq: baseSaHz, vol: 0.35, pan: 0.0 },
-      { freq: baseSaHz, vol: 0.35, pan: 0.1 },
-      { freq: saLowHz, vol: 0.3, pan: 0.3 },
-    ];
-
-    const cycleDuration = 4; // seconds for full Sa-Pa-Sa-Sa cycle
-
-    strings.forEach((s, i) => {
-      const panner = new Tone.Panner(s.pan).connect(this._masterGain);
-
-      // Main tone with harmonics (simulating jawari buzz)
-      const synth = new Tone.Synth({
-        oscillator: {
-          type: 'fatsawtooth',
-          count: 3,
-          spread: 2,
-        },
-        envelope: {
-          attack: 0.01,
-          decay: 0.1,
-          sustain: 1,
-          release: 0.5,
-        },
-      }).connect(panner);
-
-      // LFO for amplitude cycling (mimics pluck pattern)
-      const lfo = new Tone.LFO({
-        frequency: 1 / cycleDuration,
-        min: s.vol * 0.4,
-        max: s.vol,
-        phase: (i / strings.length) * 360,
-        type: 'sine',
-      });
-      lfo.connect(synth.volume);
-      lfo.start();
-
-      // Start the tone
-      synth.triggerAttack(s.freq, Tone.now());
-
-      this.nodes.push({ synth, panner, lfo });
+    this._player = new Tone.Player({
+      url,
+      loop: true,
+      playbackRate,
+      fadeIn: 0.5,
+      fadeOut: 0.5,
     });
+    this._player.connect(this._gainNode);
 
-    this.isPlaying = true;
-  }
-
-  /**
-   * Stop the tanpura drone.
-   */
-  stop() {
-    this.nodes.forEach(({ synth, panner, lfo }) => {
-      try {
-        synth.triggerRelease();
-        setTimeout(() => {
-          synth.dispose();
-          panner.dispose();
-          lfo.dispose();
-        }, 600);
-      } catch {
-        // already disposed
-      }
-    });
-    if (this._masterGain) {
-      setTimeout(() => this._masterGain?.dispose(), 700);
+    // Wait for buffer to load, then start
+    await Tone.loaded();
+    if (this._player) {
+      this._player.start();
+      this.isPlaying = true;
     }
-    this.nodes = [];
-    this.isPlaying = false;
   }
 
-  /**
-   * Set volume in dB.
-   */
+  stop() {
+    this.isPlaying = false;
+    if (this._player) {
+      try { this._player.stop(); } catch {}
+      this._player.dispose();
+      this._player = null;
+    }
+    if (this._gainNode) {
+      this._gainNode.dispose();
+      this._gainNode = null;
+    }
+  }
+
   setVolume(db) {
     this._volume = db;
-    if (this._masterGain) {
-      this._masterGain.gain.value = Tone.dbToGain(db);
+    if (this._gainNode) {
+      this._gainNode.gain.value = Tone.dbToGain(db);
     }
   }
 
-  /**
-   * Update the base frequency (key change).
-   */
   updateKey(baseSaHz) {
     if (this.isPlaying) {
       this.stop();
-      this.start(baseSaHz);
+      setTimeout(() => this.start(baseSaHz), 100);
+    } else {
+      this._baseSaHz = baseSaHz;
     }
-    this._baseSaHz = baseSaHz;
   }
 }

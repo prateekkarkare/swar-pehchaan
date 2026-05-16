@@ -935,3 +935,232 @@ body {
     gap: 6px;
   }
 }
+
+/* ── Tanpura Lab ───────────────────────────────── */
+
+.tanpura-lab {
+  padding: 16px 0 48px;
+}
+
+.lab-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.lab-header h2 {
+  font-size: 1.6rem;
+  font-weight: 600;
+}
+
+.lab-hint {
+  color: var(--color-text-dim);
+  font-size: 0.85rem;
+  margin-bottom: 20px;
+  padding: 12px 16px;
+  background: var(--color-surface);
+  border-left: 3px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+}
+
+.lab-hint strong { color: var(--color-text); }
+.lab-hint em { color: var(--color-accent); font-style: normal; }
+
+.lab-transport {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+  padding: 14px 16px;
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--color-border);
+}
+
+.lab-key-select {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.lab-volume {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.lab-volume label {
+  font-size: 0.85rem;
+  color: var(--color-text-dim);
+}
+
+.lab-volume input[type="range"] {
+  width: 100px;
+}
+
+.lab-val {
+  font-size: 0.85rem;
+  color: var(--color-accent);
+  font-family: monospace;
+  min-width: 60px;
+  text-align: right;
+}
+
+.lab-params {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.lab-param {
+  background: var(--color-surface);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  border: 1px solid var(--color-border);
+}
+
+.lab-param-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.lab-param-row label {
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.lab-param input[type="range"] {
+  width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  background: var(--color-bg);
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.lab-param input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  cursor: pointer;
+  border: 2px solid var(--color-surface);
+}
+
+.lab-param-desc {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+.lab-presets {
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  margin-bottom: 24px;
+}
+
+.lab-presets h3 {
+  font-size: 1.1rem;
+  margin-bottom: 12px;
+}
+
+.preset-save {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.preset-save input {
+  flex: 1;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: 0.9rem;
+}
+
+.preset-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.preset-item {
+  display: flex;
+  gap: 6px;
+}
+
+.preset-load {
+  flex: 1;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+}
+
+.preset-load:hover {
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent);
+}
+
+.preset-delete {
+  background: none;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.preset-delete:hover {
+  background: var(--color-incorrect-bg);
+  border-color: var(--color-incorrect);
+  color: var(--color-incorrect);
+}
+
+.lab-json {
+  background: var(--color-surface);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  border: 1px solid var(--color-border);
+}
+
+.lab-json summary {
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--color-text-dim);
+  user-select: none;
+}
+
+.lab-json pre {
+  font-family: 'SF Mono', Menlo, monospace;
+  font-size: 0.8rem;
+  margin-top: 10px;
+  color: var(--color-accent);
+  overflow-x: auto;
+}
