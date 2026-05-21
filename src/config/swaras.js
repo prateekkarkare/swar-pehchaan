@@ -36,6 +36,12 @@ export const SHUDDHA_SWARAS = SWARAS.filter(
   (s) => s.type === SWARA_TYPES.SHUDDHA && s.octave === 0,
 );
 
+/** Shuddha swaras + upper Sa (Sa Re Ga Ma Pa Dha Ni Sa') — practice pool */
+export const SHUDDHA_SWARAS_WITH_HIGH_SA = [
+  ...SHUDDHA_SWARAS,
+  SWARAS.find((s) => s.id === "Sa'"),
+];
+
 /** The ascending aaroh scale using shuddha swaras + upper Sa */
 export const AAROH = [
   ...SHUDDHA_SWARAS,

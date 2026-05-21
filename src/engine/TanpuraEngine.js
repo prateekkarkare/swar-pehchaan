@@ -53,8 +53,6 @@ export default class TanpuraEngine {
       url,
       loop: true,
       playbackRate,
-      fadeIn: 0.5,
-      fadeOut: 0.5,
     });
     this._player.connect(this._gainNode);
 

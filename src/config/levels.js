@@ -5,7 +5,7 @@
  * just append an entry — no code changes required elsewhere.
  */
 
-import { SHUDDHA_SWARAS, SWARAS, SWARA_TYPES } from './swaras.js';
+import { SHUDDHA_SWARAS, SHUDDHA_SWARAS_WITH_HIGH_SA, SWARAS, SWARA_TYPES } from './swaras.js';
 
 /**
  * @typedef {Object} LevelConfig
@@ -27,8 +27,8 @@ const LEVELS = [
     id: 'swara-l1',
     number: 1,
     name: 'Single Swara',
-    description: 'Identify one shuddha swara at a time',
-    swaraPool: SHUDDHA_SWARAS.map((s) => s.id),
+    description: 'Identify one shuddha swara at a time (Sa to high Sa)',
+    swaraPool: SHUDDHA_SWARAS_WITH_HIGH_SA.map((s) => s.id),
     questionCount: 1,
     totalQuestions: 10,
     randomTiming: false,
@@ -41,7 +41,7 @@ const LEVELS = [
     number: 2,
     name: 'Two Swaras',
     description: 'Identify a pair of shuddha swaras played in sequence',
-    swaraPool: SHUDDHA_SWARAS.map((s) => s.id),
+    swaraPool: SHUDDHA_SWARAS_WITH_HIGH_SA.map((s) => s.id),
     questionCount: 2,
     totalQuestions: 10,
     randomTiming: false,

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import audioEngine from '../../engine/AudioEngine.js';
 import { generateQuestion, checkAnswer, getPlaybackTiming } from '../../quiz/QuizEngine.js';
-import { SHUDDHA_SWARAS } from '../../config/swaras.js';
+import { SHUDDHA_SWARAS, getSwaraById } from '../../config/swaras.js';
 import { saveSession } from '../../progress/ProgressStore.js';
 
 /**
@@ -242,7 +242,7 @@ export default function SwaraQuiz({ level, settings, onBack, onFinish }) {
 
       {/* Swara selection buttons */}
       <div className="swara-buttons">
-        {SHUDDHA_SWARAS.map((swara) => {
+        {level.swaraPool.map((id) => getSwaraById(id)).map((swara) => {
           const isSelected = userAnswer.includes(swara.id);
           const isCorrectAnswer = result && currentQuestion.swaras.includes(swara.id);
           const isWrongPick = result && userAnswer.includes(swara.id) && !currentQuestion.swaras.includes(swara.id);
