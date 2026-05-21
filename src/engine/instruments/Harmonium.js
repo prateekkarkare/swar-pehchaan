@@ -182,6 +182,16 @@ export default class HarmoniumSynth {
     }
   }
 
+  /**
+   * Cancel all scheduled notes and release any active voices.
+   * Tone's PolySynth doesn't expose a way to cancel future-scheduled
+   * triggerAttackRelease events, so we dispose + re-init.
+   */
+  stopAll() {
+    this.dispose();
+    this.init();
+  }
+
   dispose() {
     this._synth?.dispose();
     this._reedBank2?.dispose();

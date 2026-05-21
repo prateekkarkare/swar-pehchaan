@@ -117,6 +117,13 @@ class AudioEngine {
     this.instrument.playNote(swaraFrequency(swara, this._baseSaHz), duration);
   }
 
+  /**
+   * Stop any in-progress instrument playback (aaroh / quiz notes).
+   */
+  stopInstrument() {
+    this.instrument?.stopAll?.();
+  }
+
   setTanpuraVolume(db) {
     this.tanpura.setVolume(db);
   }

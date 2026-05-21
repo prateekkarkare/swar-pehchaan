@@ -25,8 +25,20 @@ export default function SwaraQuiz({ level, settings, onBack, onFinish }) {
   const [results, setResults] = useState([]);
   const [sessionSummary, setSessionSummary] = useState(null);
   const questionStartTime = useRef(null);
+  const cancelledRef = useRef(false);
 
   const answersNeeded = level.questionCount;
+
+  // Cancel any in-flight playback when the quiz unmounts (e.g. user pressed Back).
+  // Note: we deliberately do NOT stop the tanpura here — App.jsx owns that lifecycle,
+  // and StrictMode's dev-only double-invoke would otherwise kill it on mount.
+  useEffect(() => {
+    cancelledRef.current = false;
+    return () => {
+      cancelledRef.current = true;
+      audioEngine.stopInstrument();
+    };
+  }, []);
 
   // Start a new question
   const nextQuestion = useCallback(async () => {
@@ -39,14 +51,17 @@ export default function SwaraQuiz({ level, settings, onBack, onFinish }) {
     if (level.playAaroh) {
       setQuizState(STATES.PLAYING_AAROH);
       await audioEngine.playAaroh(0.5, 0.12);
+      if (cancelledRef.current) return;
       // Brief pause after aaroh
       await new Promise((r) => setTimeout(r, 600));
+      if (cancelledRef.current) return;
     }
 
     // Play the question swaras
     setQuizState(STATES.PLAYING_QUESTION);
     const timing = getPlaybackTiming(level);
     await audioEngine.playSwaras(question.swaras, timing.noteDuration, timing.gapDuration);
+    if (cancelledRef.current) return;
 
     setQuizState(STATES.AWAITING_ANSWER);
     questionStartTime.current = Date.now();

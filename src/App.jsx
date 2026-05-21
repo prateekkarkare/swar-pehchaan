@@ -97,12 +97,18 @@ export default function App() {
   }, [initAudio, tanpuraOn]);
 
   const handleBackToHome = useCallback(() => {
+    audioEngine.stopTanpura();
+    audioEngine.stopInstrument();
+    setTanpuraOn(false);
     setPage(PAGES.HOME);
     setSelectedMode(null);
     setSelectedLevel(null);
   }, []);
 
   const handleBackToLevels = useCallback(() => {
+    audioEngine.stopTanpura();
+    audioEngine.stopInstrument();
+    setTanpuraOn(false);
     setPage(PAGES.LEVEL_SELECT);
     setSelectedLevel(null);
   }, []);
