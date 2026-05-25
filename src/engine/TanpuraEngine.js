@@ -10,9 +10,11 @@
 
 import * as Tone from 'tone';
 
+const assetUrl = (path) => `${import.meta.env.BASE_URL}${path}`;
+
 const SAMPLES = [
-  { note: 'C', baseSaHz: 130.81, url: '/audio/tanpura/C.ogg' },
-  { note: 'D', baseSaHz: 146.83, url: '/audio/tanpura/D.ogg' },
+  { note: 'C', baseSaHz: 130.81, url: assetUrl('audio/tanpura/C.ogg') },
+  { note: 'D', baseSaHz: 146.83, url: assetUrl('audio/tanpura/D.ogg') },
 ];
 
 function pickSample(targetHz) {

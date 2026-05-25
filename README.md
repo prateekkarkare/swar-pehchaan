@@ -37,6 +37,18 @@ Open [http://localhost:3000](http://localhost:3000) in a modern browser (Chrome,
 
 > The first click anywhere on the page is required to unlock the Web Audio context — this is a browser policy, not a bug.
 
+### Always-on public URL
+
+This repo is set up to deploy for free on **GitHub Pages**.
+
+Once Pages is enabled, every push to `main` will automatically build and publish the app at:
+
+```text
+https://prateekkarkare.github.io/swar-pehchaan/
+```
+
+If you rename the repo, update the `VITE_BASE_PATH` value in [.github/workflows/deploy.yml](.github/workflows/deploy.yml).
+
 ### Production build
 
 ```bash
@@ -45,6 +57,47 @@ npm run preview    # serve dist/ locally to verify
 ```
 
 The contents of `dist/` can be hosted on any static server (GitHub Pages, Netlify, Vercel, S3, nginx, …). No backend is required.
+
+---
+
+## Free Deploy With GitHub Pages
+
+This is the simplest no-cost setup for a public repo.
+
+### One-time GitHub setup
+
+1. Push this repo to GitHub.
+2. Open the repo on GitHub.
+3. Go to `Settings` → `Pages`.
+4. Under `Build and deployment`, choose `GitHub Actions` as the source.
+5. Push to `main`.
+
+The workflow in [.github/workflows/deploy.yml](.github/workflows/deploy.yml) will build the app and publish it automatically.
+
+### What the pipeline does
+
+- Triggers on every push to `main`
+- Installs dependencies with `npm ci`
+- Builds the Vite app with the correct Pages base path
+- Publishes the generated `dist/` folder to GitHub Pages
+
+### Local production-equivalent build
+
+```bash
+VITE_BASE_PATH=/swar-pehchaan/ npm run build
+```
+
+That matches what the GitHub Actions deploy job does.
+
+### Make it feel like an app
+
+After deployment:
+
+1. Open the GitHub Pages URL in Chrome or Edge.
+2. Use `Install app` if the browser offers it, or `Create shortcut` / `Add to Dock`.
+3. Enable `Open as window` if available.
+
+That gives you a desktop-launchable app-like window without running a dev server.
 
 ---
 
