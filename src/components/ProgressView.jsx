@@ -19,19 +19,37 @@ export default function ProgressView({ onBack }) {
   const [tab, setTab] = useState('swaras');
   const [modeFilter, setModeFilter] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const reload = async () => {
     setLoading(true);
+    setError(null);
     const filter = modeFilter ? { mode: modeFilter } : {};
-    const [o, s, ss] = await Promise.all([
-      getOverallStats(filter),
-      getSessionsList(filter),
-      getSwaraStats(filter),
-    ]);
-    setOverall(o);
-    setSessions(s);
-    setSwaraStats(ss);
-    setLoading(false);
+    try {
+      const [o, s, ss] = await Promise.all([
+        getOverallStats(filter),
+        getSessionsList(filter),
+        getSwaraStats(filter),
+      ]);
+      setOverall(o);
+      setSessions(s);
+      setSwaraStats(ss);
+    } catch (e) {
+      console.error('Failed to load progress', e);
+      setError(e?.message || String(e));
+      setOverall({
+        totalAttempts: 0,
+        totalSessions: 0,
+        totalQuestions: 0,
+        avgAccuracy: 0,
+        avgResponseMs: 0,
+        bestAccuracy: 0,
+      });
+      setSessions([]);
+      setSwaraStats([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -95,6 +113,19 @@ export default function ProgressView({ onBack }) {
           {activeAdapterName() === 'supabase' ? '☁ Cloud' : '💾 Local'}
         </span>
       </div>
+
+      {error && (
+        <div className="error-banner">
+          <strong>Couldn't load from {activeAdapterName()}:</strong> {error}
+          <br />
+          <small>
+            If you just enabled Supabase, make sure: (1) the SQL from
+            SUPABASE_SETUP.md has been run, (2) Anonymous sign-ins are enabled
+            in Auth → Providers, (3) you restarted <code>npm run dev</code> after
+            editing <code>.env.local</code>.
+          </small>
+        </div>
+      )}
 
       <div className="overall-stats">
         <div className="stat">
