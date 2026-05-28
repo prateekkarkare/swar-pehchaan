@@ -1164,3 +1164,250 @@ body {
   color: var(--color-accent);
   overflow-x: auto;
 }
+
+/* ───── Custom mode config ───── */
+
+.custom-config {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 24px 16px 80px;
+}
+
+.config-section {
+  margin-top: 28px;
+}
+
+.config-label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 12px;
+}
+
+.config-hint {
+  margin-top: 10px;
+  font-size: 0.85rem;
+  color: var(--color-text-dim);
+}
+
+.config-summary {
+  margin-top: 28px;
+  padding: 16px;
+  background: var(--color-surface);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  font-size: 0.95rem;
+}
+
+.config-summary p {
+  margin: 4px 0;
+}
+
+.config-actions {
+  margin-top: 28px;
+  display: flex;
+  justify-content: center;
+}
+
+.preset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.preset-card {
+  text-align: left;
+  padding: 14px 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.preset-card:hover {
+  border-color: var(--color-accent);
+}
+
+.preset-card.active {
+  border-color: var(--color-accent);
+  background: var(--color-accent-bg, rgba(255,255,255,0.04));
+  box-shadow: 0 0 0 1px var(--color-accent) inset;
+}
+
+.preset-name {
+  display: block;
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+
+.preset-desc {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--color-text-dim);
+}
+
+.swara-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: 8px;
+}
+
+.swara-picker-btn {
+  padding: 10px 6px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  transition: all 0.15s;
+}
+
+.swara-picker-btn:hover {
+  border-color: var(--color-accent);
+}
+
+.swara-picker-btn.active {
+  background: var(--color-accent);
+  color: #000;
+  border-color: var(--color-accent);
+}
+
+.level-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.level-pill {
+  padding: 8px 18px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  color: var(--color-text);
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.15s;
+}
+
+.level-pill:hover:not(:disabled) {
+  border-color: var(--color-accent);
+}
+
+.level-pill.active {
+  background: var(--color-accent);
+  color: #000;
+  border-color: var(--color-accent);
+}
+
+.level-pill:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ───── Progress view extras ───── */
+
+.progress-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--color-border);
+  margin: 16px 0;
+}
+
+.tab-btn {
+  padding: 10px 16px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--color-text-dim);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.tab-btn.active {
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
+}
+
+.swara-stat-row {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-border);
+  align-items: center;
+}
+
+.swara-stat-name {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.swara-stat-bar {
+  position: relative;
+  height: 22px;
+  background: var(--color-surface);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.swara-stat-bar .bar-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--color-accent);
+  transition: width 0.3s;
+}
+
+.swara-stat-bar .bar-fill.good   { background: #4ade80; }
+.swara-stat-bar .bar-fill.ok     { background: #facc15; }
+.swara-stat-bar .bar-fill.poor   { background: #f87171; }
+
+.swara-stat-bar .bar-label {
+  position: relative;
+  z-index: 1;
+  padding: 0 10px;
+  line-height: 22px;
+  font-size: 0.85rem;
+  color: var(--color-text);
+  font-weight: 600;
+  mix-blend-mode: difference;
+}
+
+.swara-stat-meta {
+  grid-column: 1 / -1;
+  font-size: 0.8rem;
+  color: var(--color-text-dim);
+}
+
+.progress-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+.file-label {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.storage-badge {
+  margin-left: auto;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  font-size: 0.8rem;
+  color: var(--color-text-dim);
+}

@@ -9,11 +9,12 @@ Built with **Vite + React + Tone.js**.
 ## Features
 
 - 🎵 **Swara recognition quizzes** with progressive levels (single swara, pairs, …).
+- 🎼 **Custom practice mode** — pick a raag preset (Yaman, Bhairavi, Hamsadhwani, Bhupali, Malkauns, Durga, …) or your own swaras, and configure how many notes per question.
 - 🪕 **Sample-based tanpura drone** using real recordings, gapless-looped, pitch-shifted to your chosen Sa.
 - 🎹 **Synthesized harmonium** (additive partials, multiple reed banks, breath noise, bellows LFO) for question playback.
 - 🎚️ **Selectable keys** — C, C#, D (more easy to add).
-- 📈 **Progress tracking** stored in `localStorage`.
-- ⚙️ **Config-driven** — add levels, swaras, keys, and instruments by editing plain JS objects, no UI rewiring.
+- 📈 **Progress tracking** as an append-only event log — per-swara mastery, confusion matrix, session history. Stored in `localStorage` by default, with optional cloud sync via Supabase (see [SUPABASE_SETUP.md](SUPABASE_SETUP.md)).
+- ⚙️ **Config-driven** — add levels, swaras, keys, instruments, and raag presets by editing plain JS objects, no UI rewiring.
 
 ---
 

@@ -1,8 +1,23 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import MODES from '../modes/registry.js';
-import { getStats } from '../progress/ProgressStore.js';
+import { getOverallStats } from '../progress/queries.js';
 
 export default function Home({ onSelectMode }) {
+  const [statsByMode, setStatsByMode] = useState({});
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const entries = await Promise.all(
+        MODES.map(async (m) => [m.id, await getOverallStats({ mode: m.id })]),
+      );
+      if (!cancelled) setStatsByMode(Object.fromEntries(entries));
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <div className="home">
       <div className="home-hero">
@@ -12,8 +27,8 @@ export default function Home({ onSelectMode }) {
 
       <div className="mode-cards">
         {MODES.map((mode) => {
-          const stats = getStats({ mode: mode.id });
-          const isAvailable = mode.id === 'swara'; // Only swara mode active for now
+          const stats = statsByMode[mode.id];
+          const isAvailable = mode.available !== false;
           return (
             <button
               key={mode.id}
@@ -24,7 +39,7 @@ export default function Home({ onSelectMode }) {
               <span className="mode-icon">{mode.icon}</span>
               <span className="mode-name">{mode.name}</span>
               <span className="mode-desc">{mode.description}</span>
-              {stats.totalSessions > 0 && (
+              {stats && stats.totalSessions > 0 && (
                 <span className="mode-stats">
                   {stats.totalSessions} sessions · {Math.round(stats.avgAccuracy * 100)}% avg
                 </span>

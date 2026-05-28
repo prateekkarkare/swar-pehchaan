@@ -2,7 +2,62 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import audioEngine from '../../engine/AudioEngine.js';
 import { generateQuestion, checkAnswer, getPlaybackTiming } from '../../quiz/QuizEngine.js';
 import { SHUDDHA_SWARAS, getSwaraById } from '../../config/swaras.js';
-import { saveSession } from '../../progress/ProgressStore.js';
+import { addAttempts, makeSessionId, makeQuestionId } from '../../progress/store.js';
+import { SWARA_SEMITONES } from '../../progress/schema.js';
+
+// Build the per-note attempt rows that get appended to the event log
+// when a single question is completed.
+function buildAttempts({ played, answered, totalTimeMs, level, settings, sessionId }) {
+  const questionId = makeQuestionId();
+  const perNoteMs = Math.round(totalTimeMs / Math.max(played.length, 1));
+  return played.map((p, pi) => {
+    const ans = answered[pi] ?? null;
+    const prev = pi > 0 ? played[pi - 1] : null;
+    const interval =
+      prev != null ? (SWARA_SEMITONES[p] ?? 0) - (SWARA_SEMITONES[prev] ?? 0) : null;
+    return {
+      sessionId,
+      questionId,
+      position: pi,
+      played: p,
+      answered: ans,
+      correct: p === ans,
+      responseMs: perNoteMs,
+      ctx: {
+        mode: level.mode || 'swara',
+        levelId: level.id,
+        levelNumber: level.number,
+        levelName: level.name,
+        preset: level.presetId || null,
+        presetName: level.presetName || null,
+        poolHash: level.poolHash || null,
+        poolSize: level.swaraPool.length,
+        questionLength: played.length,
+        prevPlayed: prev,
+        intervalSemitones: interval,
+        direction:
+          interval == null ? null : interval > 0 ? 'up' : interval < 0 ? 'down' : 'same',
+        key: settings.keyId,
+        instrument: settings.instrumentId,
+      },
+    };
+  });
+}
+
+// Local summary computed from the in-memory results array.
+// The store no longer returns a summary — it's purely an event log now.
+function summarize(results) {
+  const total = results.length;
+  const correct = results.filter((r) => r.correct).length;
+  const totalTime = results.reduce((s, r) => s + (r.timeMs || 0), 0);
+  return {
+    accuracy: total > 0 ? correct / total : 0,
+    correctCount: correct,
+    totalQuestions: total,
+    avgTimeMs: total > 0 ? Math.round(totalTime / total) : 0,
+    questions: results,
+  };
+}
 
 /**
  * Quiz states
@@ -26,6 +81,7 @@ export default function SwaraQuiz({ level, settings, onBack, onFinish }) {
   const [sessionSummary, setSessionSummary] = useState(null);
   const questionStartTime = useRef(null);
   const cancelledRef = useRef(false);
+  const sessionIdRef = useRef(makeSessionId());
 
   const answersNeeded = level.questionCount;
 
@@ -94,9 +150,20 @@ export default function SwaraQuiz({ level, settings, onBack, onFinish }) {
         setResult(questionResult);
         setResults((prev) => [...prev, questionResult]);
         setQuizState(STATES.SHOWING_RESULT);
+
+        // Persist per-note attempts to the event log (fire-and-forget).
+        const atts = buildAttempts({
+          played: currentQuestion.swaras,
+          answered: newAnswer,
+          totalTimeMs: timeMs,
+          level,
+          settings,
+          sessionId: sessionIdRef.current,
+        });
+        addAttempts(atts).catch((e) => console.warn('Failed to save attempt', e));
       }
     },
-    [quizState, userAnswer, answersNeeded, currentQuestion],
+    [quizState, userAnswer, answersNeeded, currentQuestion, level, settings],
   );
 
   // Replay the question swaras
@@ -112,22 +179,14 @@ export default function SwaraQuiz({ level, settings, onBack, onFinish }) {
   const handleNext = useCallback(() => {
     const nextIdx = questionIndex + 1;
     if (nextIdx >= level.totalQuestions) {
-      // Session complete
-      const allResults = [...results];
-      const summary = saveSession({
-        mode: 'swara',
-        levelId: level.id,
-        levelNumber: level.number,
-        instrument: settings.instrumentId,
-        key: settings.keyId,
-        questions: allResults,
-      });
-      setSessionSummary(summary);
+      // Session complete — attempts have already been written one
+      // question at a time. Build the on-screen summary from local state.
+      setSessionSummary(summarize(results));
       setQuizState(STATES.FINISHED);
     } else {
       setQuestionIndex(nextIdx);
     }
-  }, [questionIndex, level, results, settings]);
+  }, [questionIndex, level, results]);
 
   // Auto-start next question when questionIndex changes
   useEffect(() => {
@@ -150,7 +209,7 @@ export default function SwaraQuiz({ level, settings, onBack, onFinish }) {
       <div className="quiz-container">
         <div className="quiz-header">
           <button className="btn-back" onClick={onBack}>← Back</button>
-          <h2>Level {level.number}: {level.name}</h2>
+          <h2>{level.name}</h2>
         </div>
         <div className="quiz-ready">
           <p>{level.description}</p>
@@ -198,6 +257,7 @@ export default function SwaraQuiz({ level, settings, onBack, onFinish }) {
 
           <div className="finish-actions">
             <button className="btn-primary" onClick={() => {
+              sessionIdRef.current = makeSessionId();
               setQuizState(STATES.READY);
               setQuestionIndex(0);
               setResults([]);

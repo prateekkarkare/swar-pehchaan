@@ -1,23 +1,23 @@
 /**
  * Mode registry.
- * Each mode (swara, raag, etc.) registers its config here.
- *
- * To add a new mode, import it and add to MODES.
+ * Each mode (swara, custom, raag, ...) registers its config here.
  */
 
 const MODES = [
   {
     id: 'swara',
     name: 'Swara Identification',
-    description: 'Identify individual swaras played after the aaroh',
+    description: 'Progressive levels — single, then multiple swaras',
     icon: '🎵',
+    available: true,
   },
-  // {
-  //   id: 'raag',
-  //   name: 'Raag Identification',
-  //   description: 'Identify the raag from a short phrase',
-  //   icon: '🎶',
-  // },
+  {
+    id: 'custom',
+    name: 'Custom Practice',
+    description: 'Pick a raag preset (Yaman, Bhairavi, …) or your own swaras',
+    icon: '🎼',
+    available: true,
+  },
 ];
 
 export default MODES;

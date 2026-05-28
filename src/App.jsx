@@ -4,6 +4,7 @@ import Settings from './components/Settings.jsx';
 import ProgressView from './components/ProgressView.jsx';
 import LevelSelect from './modes/swara/LevelSelect.jsx';
 import SwaraQuiz from './modes/swara/SwaraQuiz.jsx';
+import CustomConfig from './modes/custom/CustomConfig.jsx';
 import audioEngine from './engine/AudioEngine.js';
 import { getKeyById, DEFAULT_KEY_ID } from './config/keys.js';
 import { DEFAULT_INSTRUMENT_ID } from './config/instruments.js';
@@ -11,6 +12,7 @@ import { DEFAULT_INSTRUMENT_ID } from './config/instruments.js';
 const PAGES = {
   HOME: 'home',
   LEVEL_SELECT: 'level_select',
+  CUSTOM_CONFIG: 'custom_config',
   QUIZ: 'quiz',
   PROGRESS: 'progress',
 };
@@ -83,7 +85,7 @@ export default function App() {
   const handleSelectMode = useCallback(async (modeId) => {
     await initAudio();
     setSelectedMode(modeId);
-    setPage(PAGES.LEVEL_SELECT);
+    setPage(modeId === 'custom' ? PAGES.CUSTOM_CONFIG : PAGES.LEVEL_SELECT);
   }, [initAudio]);
 
   const handleSelectLevel = useCallback(async (level) => {
@@ -109,9 +111,11 @@ export default function App() {
     audioEngine.stopTanpura();
     audioEngine.stopInstrument();
     setTanpuraOn(false);
-    setPage(PAGES.LEVEL_SELECT);
+    setPage(
+      selectedMode === 'custom' ? PAGES.CUSTOM_CONFIG : PAGES.LEVEL_SELECT,
+    );
     setSelectedLevel(null);
-  }, []);
+  }, [selectedMode]);
 
   const handleUpdateSettings = useCallback((newSettings) => {
     setSettings(newSettings);
@@ -166,6 +170,13 @@ export default function App() {
 
         {page === PAGES.LEVEL_SELECT && selectedMode === 'swara' && (
           <LevelSelect onSelectLevel={handleSelectLevel} />
+        )}
+
+        {page === PAGES.CUSTOM_CONFIG && selectedMode === 'custom' && (
+          <CustomConfig
+            onStart={handleSelectLevel}
+            onBack={handleBackToHome}
+          />
         )}
 
         {page === PAGES.QUIZ && selectedLevel && (
