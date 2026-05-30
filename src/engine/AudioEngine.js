@@ -69,15 +69,25 @@ class AudioEngine {
   }
 
   /**
-   * Play the ascending aaroh (Sa Re Ga Ma Pa Dha Ni Sa').
+   * Play the ascending aaroh (reference scale).
    * @param {number} noteDur — seconds per note
    * @param {number} gap — gap between notes
+   * @param {string[]} [swaraIds] — optional custom scale (e.g. a raag's swaras).
+   *        Defaults to the full shuddha aaroh. Played low → high.
    * @returns {Promise} resolves when aaroh finishes
    */
-  playAaroh(noteDur = 0.6, gap = 0.15) {
+  playAaroh(noteDur = 0.6, gap = 0.15, swaraIds = null) {
     if (!this.instrument) return Promise.resolve();
 
-    const notes = AAROH.map((s) => ({
+    const scale =
+      swaraIds && swaraIds.length
+        ? swaraIds
+            .map((id) => getSwaraById(id))
+            .filter(Boolean)
+            .sort((a, b) => a.ratio - b.ratio)
+        : AAROH;
+
+    const notes = scale.map((s) => ({
       freq: swaraFrequency(s, this._baseSaHz),
       dur: noteDur,
     }));

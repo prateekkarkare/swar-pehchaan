@@ -106,7 +106,7 @@ export default function SwaraQuiz({ level, settings, onBack, onFinish }) {
     // Play aaroh if configured
     if (level.playAaroh) {
       setQuizState(STATES.PLAYING_AAROH);
-      await audioEngine.playAaroh(0.5, 0.12);
+      await audioEngine.playAaroh(0.5, 0.12, level.swaraPool);
       if (cancelledRef.current) return;
       // Brief pause after aaroh
       await new Promise((r) => setTimeout(r, 600));
