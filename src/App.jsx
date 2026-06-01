@@ -5,6 +5,7 @@ import ProgressView from './components/ProgressView.jsx';
 import LevelSelect from './modes/swara/LevelSelect.jsx';
 import SwaraQuiz from './modes/swara/SwaraQuiz.jsx';
 import CustomConfig from './modes/custom/CustomConfig.jsx';
+import AccountMenu from './components/AccountMenu.jsx';
 import audioEngine from './engine/AudioEngine.js';
 import { getKeyById, DEFAULT_KEY_ID } from './config/keys.js';
 import { DEFAULT_INSTRUMENT_ID } from './config/instruments.js';
@@ -150,6 +151,7 @@ export default function App() {
           >
             📊
           </button>
+          <AccountMenu />
         </div>
       </nav>
 

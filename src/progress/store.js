@@ -27,6 +27,9 @@ let migrationPromise = null;
 let cache = null;
 
 async function ensureMigrated() {
+  // Legacy v1 → v2 migration only applies to the local adapter (offline dev).
+  // In cloud mode each user's data lives in Supabase under their auth id.
+  if (isSupabaseEnabled()) return;
   if (migrationPromise) return migrationPromise;
   migrationPromise = (async () => {
     if (isLegacyMigrated()) return;

@@ -13,10 +13,12 @@ async function ensureSession() {
   const {
     data: { session },
   } = await supabase.auth.getSession();
-  if (session?.user) return session.user.id;
-  const { data, error } = await supabase.auth.signInAnonymously();
-  if (error) throw error;
-  return data.user.id;
+  if (!session?.user) {
+    // The AuthGate guarantees a logged-in user before the app renders,
+    // so reaching here means the session expired mid-use.
+    throw new Error('Not signed in');
+  }
+  return session.user.id;
 }
 
 function attemptToRow(a, userId) {

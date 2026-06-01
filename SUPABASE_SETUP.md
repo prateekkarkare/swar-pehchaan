@@ -1,12 +1,27 @@
-# Supabase setup (optional cloud sync)
+# Supabase setup (cloud sync + Google login)
 
-The app works fully on localStorage if you don't configure Supabase. Cloud sync
-gives you cross-device progress and a backed-up history.
+The app works fully on localStorage in local dev when Supabase env vars are not
+set. When configured, it **requires Google sign-in** and stores each user's
+progress in their own account.
 
 ## 1. Create a project
 
 1. Sign in to https://supabase.com and create a new project.
-2. In **Authentication → Providers**, enable **Anonymous sign-ins**.
+
+## 1a. Enable Google sign-in
+
+1. In **Google Cloud Console** → APIs & Services → Credentials, create an
+   **OAuth 2.0 Client ID** (type: Web application).
+   - **Authorized redirect URI:**
+     `https://<project-ref>.supabase.co/auth/v1/callback`
+     (e.g. `https://dbktmrijojtozawzamyb.supabase.co/auth/v1/callback`)
+   - Copy the **Client ID** and **Client Secret**.
+2. In **Supabase → Authentication → Providers → Google**, paste the Client ID
+   and Client Secret, and enable the provider.
+3. In **Supabase → Authentication → URL Configuration**, add to **Redirect URLs**:
+   - `http://localhost:3000`
+   - `https://prateekkarkare.github.io/swar-pehchaan/`
+4. (Optional) Disable **Anonymous sign-ins** — the app no longer uses them.
 
 ## 2. Create the `attempts` table
 
@@ -76,13 +91,37 @@ Add two repository secrets (Settings → Secrets and variables → Actions):
 
 The deploy workflow already passes them to the build.
 
-## 4. Migration
+## 4. Local dev legacy migration
 
-The first time the app boots with a populated `ear-training-progress` (v1) key in
-localStorage, the legacy sessions are exploded into per-note attempts and
-inserted into the active adapter (local or Supabase). This runs exactly once
-and is idempotent — the legacy key is left in place so you can re-export it
-if needed.
+In **local dev only** (Supabase env vars unset), the first boot with a populated
+`ear-training-progress` (v1) localStorage key explodes the old sessions into
+per-note attempts. In cloud mode this is skipped — each user's data lives in
+Supabase under their auth id.
+
+## 5. One-time: reassign existing anonymous data to a real account
+
+If you practiced earlier while the app used anonymous auth, those rows are owned
+by an anonymous `auth.users` id. After signing in with Google **once** (which
+creates your real account), reassign them:
+
+```sql
+-- 1. See the distinct owners currently in the table.
+select user_id, count(*) from attempts group by user_id;
+
+-- 2. Find your real (Google) account id.
+select id, email from auth.users where email = 'prateek.karkare@gmail.com';
+
+-- 3. Repoint the anonymous rows to your real id.
+update attempts
+set user_id = '<your-google-auth-uuid>'
+where user_id = '<old-anonymous-uuid>';
+
+-- 4. (Optional) remove the now-empty anonymous user.
+delete from auth.users where id = '<old-anonymous-uuid>';
+```
+
+Run these in the Supabase **SQL Editor**. RLS does not block the SQL Editor
+(it runs as the service role), so this works without any app changes.
 
 ## Data model
 
@@ -93,7 +132,7 @@ insight (per-swara mastery, sessions list, interval stats, preset breakdown,
 | Field         | Purpose                                                   |
 | ------------- | --------------------------------------------------------- |
 | `id`          | ULID — sortable, unique, safe to retry/upsert             |
-| `user_id`     | Supabase anonymous user; `'local'` in localStorage        |
+| `user_id`     | Google account id (`auth.users`); `'local'` in local dev  |
 | `ts`          | Wall-clock time                                           |
 | `session_id`  | Groups attempts into one quiz session                     |
 | `question_id` | Groups attempts within one question (1+ notes)            |
