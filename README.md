@@ -14,6 +14,7 @@ Built with **Vite + React + Tone.js**.
 - 🎹 **Synthesized harmonium** (additive partials, multiple reed banks, breath noise, bellows LFO) for question playback.
 - 🎚️ **Selectable keys** — C, C#, D (more easy to add).
 - 📈 **Progress tracking** as an append-only event log — per-swara mastery, confusion matrix, session history. Stored in `localStorage` by default, with optional cloud sync via Supabase (see [SUPABASE_SETUP.md](SUPABASE_SETUP.md)).
+- 🔐 **Google sign-in** — when Supabase is configured the app requires Google login and stores each user's progress under their own account. Without Supabase env vars it runs fully offline on `localStorage` with no login.
 - ⚙️ **Config-driven** — add levels, swaras, keys, instruments, and raag presets by editing plain JS objects, no UI rewiring.
 
 ---
@@ -118,23 +119,45 @@ That gives you a desktop-launchable app-like window without running a dev server
 ```
 src/
 ├── App.jsx                    # Top-level navigation + tanpura lifecycle
-├── main.jsx                   # React entry point
+├── main.jsx                   # React entry point (wraps app in AuthProvider + AuthGate)
+├── auth/
+│   ├── AuthContext.jsx        # AuthProvider + useAuth() hook
+│   ├── AuthGate.jsx           # Gates the app behind Google login when auth is enabled
+│   └── Login.jsx              # Sign-in-with-Google screen
+├── lib/
+│   ├── auth.js                # signInWithGoogle / signOut / session helpers
+│   ├── supabase.js            # Supabase client (null when env vars absent)
+│   └── ulid.js                # ULID generator for event ids
 ├── config/
 │   ├── swaras.js              # Swara definitions (Sa, Re, Ga, …) + frequency math
 │   ├── levels.js              # Level configs (swara pool, question count, timing)
-│   └── keys.js                # Available keys (C3, C#3, D3 …)
+│   ├── keys.js                # Available keys (C3, C#3, D3 …)
+│   ├── instruments.js         # Instrument registry metadata
+│   └── presets.js             # Raag presets for Custom mode
 ├── engine/
 │   ├── AudioEngine.js         # Singleton coordinating tanpura + instrument
 │   ├── TanpuraEngine.js       # Sample-based drone with pitch shift
 │   └── instruments/
+│       ├── index.js           # Instrument registry
 │       └── Harmonium.js       # Additive-synth harmonium
 ├── quiz/
 │   └── QuizEngine.js          # Question generation + answer checking
 ├── progress/
-│   └── ProgressStore.js       # localStorage-backed session log
-├── modes/swara/
-│   └── SwaraQuiz.jsx          # Quiz screen state machine
-├── components/                # Home, LevelSelect, Settings, ProgressView
+│   ├── store.js               # Append-only event-log store (adapter-backed)
+│   ├── schema.js              # Attempt event shape + helpers
+│   ├── queries.js             # Derived stats (mastery, sessions, confusion …)
+│   ├── migration.js           # One-time legacy localStorage → event-log migration
+│   └── adapters/
+│       ├── localAdapter.js    # localStorage persistence
+│       └── supabaseAdapter.js # Supabase persistence (per-user rows)
+├── modes/
+│   ├── registry.js            # Mode registry (swara, custom)
+│   ├── swara/
+│   │   ├── LevelSelect.jsx     # Level picker
+│   │   └── SwaraQuiz.jsx       # Quiz screen state machine
+│   └── custom/
+│       └── CustomConfig.jsx   # Raag preset / custom swara picker
+├── components/                # Home, Settings, ProgressView, AccountMenu
 └── styles/index.css
 
 public/
@@ -201,9 +224,11 @@ Implement a class in `src/engine/instruments/` exposing `init()`, `playNote(freq
 | Bundler  | Vite 6          |
 | UI       | React 19        |
 | Audio    | Tone.js 15      |
-| Storage  | `localStorage`  |
+| Storage  | `localStorage` / Supabase (Postgres) |
+| Auth     | Supabase Auth (Google OAuth) |
 
-No backend. No analytics. All audio runs locally in the browser.
+No custom backend. With Supabase configured, data and auth are handled by
+Supabase; otherwise everything runs locally in the browser.
 
 ---
 
@@ -211,7 +236,7 @@ No backend. No analytics. All audio runs locally in the browser.
 
 - Web Audio requires a user gesture before audio can start — the app handles this on first click.
 - Safari may need an extra moment to load the OGG samples on first start.
-- Mobile browsers work, but use headphones for accurate pitch perception.
+- Designed for desktop browsers. iOS Safari does not play audio reliably (OGG/Web Audio limitations); Android Chrome generally works. Use headphones for accurate pitch perception.
 
 ---
 
